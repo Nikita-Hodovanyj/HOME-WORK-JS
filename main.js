@@ -25,3 +25,9 @@ function getData(){
     console.log(data)
 }
 getData()
+
+function getCurrentWeekday() {
+    const weekday = moment().format('dddd')
+    console.log("Сегодня:", weekday)
+}
+getCurrentWeekday()
