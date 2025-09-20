@@ -1,5 +1,5 @@
 const moment = require('moment')
-
+const express = require('express');
 // function getCurrentDay() {
 //   const day = moment().format('dddd')
 //   console.log(day)
@@ -19,15 +19,27 @@ const moment = require('moment')
 // getCurrentMonth()
 // getCurrentYear()
 
-
+const app = express();
+const PORT = 8000;
 function getData(){
     const data = moment().toDate()
-    console.log(data)
+    return data
 }
-getData()
+
 
 function getCurrentWeekday() {
     const weekday = moment().format('dddd')
-    console.log("Сегодня:", weekday)
+    return weekday
 }
-getCurrentWeekday()
+
+
+app.get('/timestamp', (req, res) => {
+    const now = getData(); 
+    res.json({
+      timestamp: now,
+      weekday: getCurrentWeekday()
+    });
+  });
+  app.listen(PORT, () => {
+    console.log(` Сервер запущен: http://localhost:${PORT}`);
+  });
