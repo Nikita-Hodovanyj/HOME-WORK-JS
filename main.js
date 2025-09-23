@@ -1,23 +1,7 @@
 const moment = require('moment')
 const express = require('express');
-// function getCurrentDay() {
-//   const day = moment().format('dddd')
-//   console.log(day)
-// }
-
-// function getCurrentMonth() {
-//   const month = moment().format('MMMM')
-//   console.log(month)
-// }
-
-// function getCurrentYear() {
-//   const year = moment().format('YYYY')
-//   console.log(year)
-// }
-
-// getCurrentDay()
-// getCurrentMonth()
-// getCurrentYear()
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = 8000;
@@ -43,3 +27,10 @@ app.get('/timestamp', (req, res) => {
   app.listen(PORT, () => {
     console.log(` Сервер запущен: http://localhost:${PORT}`);
   });
+
+  app.get('/posts', (req, res) => {
+      const productsPath = path.join(__dirname, "post.json")
+      const products = JSON.parse(fs.readFileSync(productsPath, "utf-8"))
+      res.json(products)
+
+    })
