@@ -2,9 +2,12 @@ const moment = require('moment')
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const fsPromises = require('fs/promises');
 
 const app = express();
 const PORT = 8000;
+
+app.use(express.json());  
 
 const productsPath = path.join(__dirname, "post.json")
 const products = JSON.parse(fs.readFileSync(productsPath, "utf-8"))
@@ -93,8 +96,50 @@ app.get('/timestamp', (req, res) => {
   
     res.json(post);
   });
-  
- 
+
+
+  app.post('/posts', async (req, res) => {
+    try {
+      const body = req.body;
+
+      if (!body) {
+        res.status(422).json({ error: "Требуется тело" });
+        return;
+      }
+
+      const { title, description, image } = body;
+
+      if (!title) {
+        res.status(422).json({ error: "Требуется название" });
+        return;
+      }
+      if (!description) {
+        res.status(422).json({ error: "Требуется описание" });
+        return;
+      }
+      if (!image) {
+        res.status(422).json({ error: "Требуеться картинка" });
+        return;
+      }
+
+      const newPost = {
+        id: products.length > 0 ? products[products.length - 1].id + 1 : 1,
+        title,
+        description,
+        image
+      };
+
+      products.push(newPost);
+
+      await fsPromises.writeFile(productsPath, JSON.stringify(products, null, 2));
+      res.status(201).json(newPost);
+
+    } catch (error) {
+
+      console.error("Ошибка при создании поста:", error);
+      res.status(500).json({ error: "Ошибка сервера" });
+    }
+});
 
 
 
