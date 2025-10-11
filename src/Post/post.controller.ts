@@ -1,10 +1,17 @@
-const postService = require('./post.service');
+import { Request, Response } from "express";
+import { postService } from "./post.service";
 
-const postController = {
-
-  getAllPosts: (req, res) => {
+export const postController = {
+  getAllPosts: (req: Request, res: Response) => {
     try {
-      const { skip, take } = req.query;
+      const skip = req.query.skip ? Number(req.query.skip) : undefined;
+      const take = req.query.take ? Number(req.query.take) : undefined;
+
+      if ((skip !== undefined && isNaN(skip)) || (take !== undefined && isNaN(take))) {
+        res.status(400).json({ error: "skip и take должны быть числами" });
+        return;
+      }
+
       const posts = postService.getAllPosts(skip, take);
       res.json(posts);
     } catch (err) {
@@ -12,8 +19,7 @@ const postController = {
     }
   },
 
-
-  getPostById: (req, res) => {
+  getPostById: (req: Request, res: Response) => {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) {
@@ -33,17 +39,13 @@ const postController = {
     }
   },
 
-
-  createPost: async (req, res) => {
+  createPost: (req: Request, res: Response) => {
     try {
-      const body = req.body;
-
-      if (!body) {
-        res.status(422).json({ error: "Требуется тело" });
-        return;
-      }
-
-      const { title, description, image } = body;
+      const { title, description, image } = req.body as {
+        title?: string;
+        description?: string;
+        image?: string;
+      };
 
       if (!title) {
         res.status(422).json({ error: "Требуется название" });
@@ -58,7 +60,7 @@ const postController = {
         return;
       }
 
-      const newPost = await postService.createPost({ title, description, image });
+      const newPost = postService.createPost({ title, description, image });
       res.status(201).json(newPost);
     } catch (error) {
       console.error("Ошибка при создании поста:", error);
@@ -66,5 +68,3 @@ const postController = {
     }
   }
 };
-
-module.exports = postController;

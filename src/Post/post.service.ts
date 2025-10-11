@@ -1,14 +1,20 @@
-const fs = require('fs');
-const fsPromises = require('fs/promises');
-const path = require('path');
+import fs from "fs";
+import fsPromises from "fs/promises";
+import path from "path";
 
-const productsPath = path.join(__dirname, 'post.json');
-const products = JSON.parse(fs.readFileSync(productsPath, 'utf-8'));
+interface Post {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+}
+
+const productsPath: string = path.join(__dirname, 'post.json');
+const products: Post[] = JSON.parse(fs.readFileSync(productsPath, 'utf-8'));
 
 const postService = {
-
-  getAllPosts(skip, take) {
-    let posts = [...products];
+  getAllPosts(skip?: string | number, take?: string | number): Post[] {
+    let posts: Post[] = [...products];
 
     if (skip && take) {
       skip = Number(skip);
@@ -32,13 +38,13 @@ const postService = {
     return posts;
   },
 
-  getPostById(id) {
+  getPostById(id: number): Post | undefined {
     return products.find(p => p.id === id);
   },
 
-  async createPost({ title, description, image }) {
-    const newPost = {
-      id: products.length > 0 ? products[products.length - 1].id + 1 : 1,
+  async createPost({ title, description, image }: { title: string; description: string; image: string; }): Promise<Post> {
+    const newPost: Post = {
+      id: products.length > 0 ? (products[products.length - 1]?.id ?? 0) + 1 : 1,
       title,
       description,
       image
@@ -50,4 +56,4 @@ const postService = {
   }
 };
 
-module.exports = postService;
+export { postService };
