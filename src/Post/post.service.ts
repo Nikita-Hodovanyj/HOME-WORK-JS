@@ -1,25 +1,20 @@
 import fs from "fs";
 import fsPromises from "fs/promises";
 import path from "path";
+import { Post, CreatePostData, UpdatePostData } from "./post.types";
 
-interface Post {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-}
+const productsPath: string = path.join(__dirname, "post.json");
+const products: Post[] = JSON.parse(fs.readFileSync(productsPath, "utf-8"));
 
-const productsPath: string = path.join(__dirname, 'post.json');
-const products: Post[] = JSON.parse(fs.readFileSync(productsPath, 'utf-8'));
-
-const postService = {
+export const postService = {
   getAllPosts(skip?: string | number, take?: string | number): Post[] {
     let posts: Post[] = [...products];
 
     if (skip && take) {
       skip = Number(skip);
       take = Number(take);
-      if (isNaN(skip) || isNaN(take)) throw new Error("skip и take должны быть числами");
+      if (isNaN(skip) || isNaN(take))
+        throw new Error("skip и take должны быть числами");
       return posts.slice(skip, skip + take);
     }
 
@@ -39,21 +34,31 @@ const postService = {
   },
 
   getPostById(id: number): Post | undefined {
-    return products.find(p => p.id === id);
+    return products.find((p) => p.id === id);
   },
 
-  async createPost({ title, description, image }: { title: string; description: string; image: string; }): Promise<Post> {
+  async createPost(data: CreatePostData): Promise<Post> {
     const newPost: Post = {
-      id: products.length > 0 ? (products[products.length - 1]?.id ?? 0) + 1 : 1,
-      title,
-      description,
-      image
+      id:
+        products.length > 0
+          ? (products[products.length - 1]?.id ?? 0) + 1
+          : 1,
+      ...data,
     };
 
     products.push(newPost);
     await fsPromises.writeFile(productsPath, JSON.stringify(products, null, 2));
     return newPost;
-  }
-};
+  },
 
-export { postService };
+  async updatePost(id: number, data: UpdatePostData): Promise<Post | null> {
+    const postIndex = products.findIndex((p) => p.id === id);
+    if (postIndex === -1) return null;
+
+    const updatedPost: Post = { ...products[postIndex], ...data } as Post;
+    products[postIndex] = updatedPost;
+
+    await fsPromises.writeFile(productsPath, JSON.stringify(products, null, 2));
+    return updatedPost;
+  },
+};

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { postService } from "./post.service";
+import { CreatePostData, UpdatePostData } from "./post.types";
 
 export const postController = {
   getAllPosts: (req: Request, res: Response) => {
@@ -34,37 +35,58 @@ export const postController = {
       }
 
       res.json(post);
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: "Ошибка сервера" });
     }
   },
 
-  createPost: (req: Request, res: Response) => {
+  createPost: async (req: Request, res: Response) => {
     try {
-      const { title, description, image } = req.body as {
-        title?: string;
-        description?: string;
-        image?: string;
-      };
+      const { title, description, image } = req.body as CreatePostData;
 
-      if (!title) {
-        res.status(422).json({ error: "Требуется название" });
-        return;
-      }
-      if (!description) {
-        res.status(422).json({ error: "Требуется описание" });
-        return;
-      }
-      if (!image) {
-        res.status(422).json({ error: "Требуется картинка" });
+      if (typeof title !== "string" || typeof description !== "string" || typeof image !== "string") {
+        res.status(400).json({ error: "Неверный тип данных" });
         return;
       }
 
-      const newPost = postService.createPost({ title, description, image });
+      const newPost = await postService.createPost({ title, description, image });
       res.status(201).json(newPost);
     } catch (error) {
       console.error("Ошибка при создании поста:", error);
       res.status(500).json({ error: "Ошибка сервера" });
     }
-  }
+  },
+
+  updatePost: async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "id должно быть числом" });
+        return;
+      }
+
+      const data = req.body as UpdatePostData;
+
+      // Проверка типов (если переданы)
+      if (
+        (data.title && typeof data.title !== "string") ||
+        (data.description && typeof data.description !== "string") ||
+        (data.image && typeof data.image !== "string")
+      ) {
+        res.status(400).json({ error: "Неверный тип данных" });
+        return;
+      }
+
+      const updatedPost = await postService.updatePost(id, data);
+      if (!updatedPost) {
+        res.status(404).json({ error: "Пост не найден" });
+        return;
+      }
+
+      res.json(updatedPost);
+    } catch (error) {
+      console.error("Ошибка при обновлении поста:", error);
+      res.status(500).json({ error: "Ошибка сервера" });
+    }
+  },
 };
