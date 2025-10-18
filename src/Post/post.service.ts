@@ -1,20 +1,19 @@
 import fs from "fs";
 import fsPromises from "fs/promises";
 import path from "path";
-import { Post, CreatePostData, UpdatePostData } from "./post.types";
+import { Post, CreatePostData, UpdatePostData, PostServiceContract } from "./post.types";
 
 const productsPath: string = path.join(__dirname, "post.json");
 const products: Post[] = JSON.parse(fs.readFileSync(productsPath, "utf-8"));
 
-export const postService = {
-  getAllPosts(skip?: string | number, take?: string | number): Post[] {
+export const postService: PostServiceContract = {
+  getAllPosts(skip?: number, take?: number): Post[] {
     let posts: Post[] = [...products];
 
     if (skip && take) {
       skip = Number(skip);
       take = Number(take);
-      if (isNaN(skip) || isNaN(take))
-        throw new Error("skip и take должны быть числами");
+      if (isNaN(skip) || isNaN(take)) throw new Error("skip и take должны быть числами");
       return posts.slice(skip, skip + take);
     }
 

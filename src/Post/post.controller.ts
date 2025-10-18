@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
 import { postService } from "./post.service";
-import { CreatePostData, UpdatePostData } from "./post.types";
+import { CreatePostData, UpdatePostData, PostControllerContract } from "./post.types";
 
-export const postController = {
-  getAllPosts: (req: Request, res: Response) => {
+
+export const postController: PostControllerContract = {
+  getAllPosts(req, res) {
     try {
       const skip = req.query.skip ? Number(req.query.skip) : undefined;
       const take = req.query.take ? Number(req.query.take) : undefined;
@@ -15,12 +15,12 @@ export const postController = {
 
       const posts = postService.getAllPosts(skip, take);
       res.json(posts);
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: "Ошибка сервера" });
     }
   },
 
-  getPostById: (req: Request, res: Response) => {
+  getPostById(req, res) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) {
@@ -40,7 +40,7 @@ export const postController = {
     }
   },
 
-  createPost: async (req: Request, res: Response) => {
+  async createPost(req, res) {
     try {
       const { title, description, image } = req.body as CreatePostData;
 
@@ -57,7 +57,7 @@ export const postController = {
     }
   },
 
-  updatePost: async (req: Request, res: Response) => {
+  async updatePost(req, res) {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) {
@@ -67,7 +67,6 @@ export const postController = {
 
       const data = req.body as UpdatePostData;
 
-      // Проверка типов (если переданы)
       if (
         (data.title && typeof data.title !== "string") ||
         (data.description && typeof data.description !== "string") ||
