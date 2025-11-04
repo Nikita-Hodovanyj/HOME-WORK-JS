@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { PostControllerContract, CreatePostData, UpdatePostData } from "./post.types";
 import { PostService } from "./post.service";
 
-export const postController: PostControllerContract = {
+export const postController = {
   async getAll(req: Request, res: Response) {
     try {
       const skip = req.query.skip ? Number(req.query.skip) : undefined;
@@ -44,7 +43,7 @@ export const postController: PostControllerContract = {
 
   async create(req: Request, res: Response) {
     try {
-      const { title, content } = req.body as CreatePostData;
+      const { title, content } = req.body;
 
       if (typeof title !== "string" || typeof content !== "string") {
         res.status(400).json({ error: "Неверный тип данных" });
@@ -67,7 +66,7 @@ export const postController: PostControllerContract = {
         return;
       }
 
-      const data = req.body as UpdatePostData;
+      const data = req.body;
       const updatedPost = await PostService.update(id, data);
 
       if (!updatedPost) {

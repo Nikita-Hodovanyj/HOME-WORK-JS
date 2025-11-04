@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import moment from "moment";
 import { PostRouter } from "./Post/post.routes";
+import { TagRouter } from "./Tag/tag.routes";
 
 const app = express();
 const PORT = 8000;
@@ -16,7 +17,8 @@ app.get('/timestamp', (req: Request, res: Response) => {
   });
 });
 
-app.use('/posts', PostRouter); 
+app.use('/posts', PostRouter);
+app.use('/tags', TagRouter);
 
 app.listen(PORT, () => {
   console.log(` Сервер запущен: http://localhost:${PORT}`);
